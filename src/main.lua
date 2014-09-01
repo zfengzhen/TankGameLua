@@ -24,6 +24,16 @@ local function main()
     cc.FileUtils:getInstance():addSearchPath("src")
     cc.FileUtils:getInstance():addSearchPath("res")
     cc.Director:getInstance():getOpenGLView():setDesignResolutionSize(480, 320, 0)
+
+    dump = require("inspect")
+        
+    local size = cc.Director:getInstance():getVisibleSize()
+    local origin = cc.Director:getInstance():getVisibleOrigin()
+    visibleRect = cc.rect(origin.x, origin.y, size.width, size.height)
+    visibleRect.xMid = cc.rectGetMidX(visibleRect)
+    visibleRect.yMid = cc.rectGetMidY(visibleRect)
+    visibleRect.xMax = cc.rectGetMaxX(visibleRect)
+    visibleRect.yMax = cc.rectGetMaxY(visibleRect)
     
     --create scene 
     local scene = require("BattleScene/BattleScene")

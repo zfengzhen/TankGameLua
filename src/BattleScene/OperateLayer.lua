@@ -15,14 +15,16 @@ function OperateLayer.create()
 end
 
 function OperateLayer:ctor()
-    self.visibleSize = cc.Director:getInstance():getVisibleSize()
-    self.origin = cc.Director:getInstance():getVisibleOrigin()
+    self._visibleSize = cc.Director:getInstance():getVisibleSize()
+    self._origin = cc.Director:getInstance():getVisibleOrigin()
     
     local joystick = require("BattleScene/Joystick")
-    self._joystickMove = joystick:create()
+    self._joystickMove = joystick.create("joystick.png", "joystickBg.png")
+    self._joystickMove:setLeftBottom()
     self._joystickMove:addToLayer(self)
     
-    self._joystickShoot = joystick:create()
+    self._joystickShoot = joystick.create("joystick.png", "joystickBg.png")
+    self._joystickShoot:setRightBottom()
     self._joystickShoot:addToLayer(self)
     
     -- 关闭按钮回调
@@ -34,8 +36,8 @@ function OperateLayer:ctor()
     -- 关闭按钮
     local closeItem = cc.MenuItemImage:create("closeNormal.png", "closeSelected.png")
     closeItem:registerScriptTapHandler(menuCloseCallback)
-    closeItem:setPosition(self.origin.x + self.visibleSize.width - closeItem:getContentSize().width/2,
-        self.origin.y + closeItem:getContentSize().height/2)
+    closeItem:setPosition(self._origin.x + self._visibleSize.width - closeItem:getContentSize().width/2,
+        self._origin.y + self._visibleSize.height - closeItem:getContentSize().height/2)
     
     -- 菜单   
     local  menu = cc.Menu:create()
@@ -47,12 +49,6 @@ function OperateLayer:ctor()
     local function onTouchesBegan(touches, event)
         for i=1, #touches do
             local location = touches[i]:getLocation()
-            local winSize = cc.Director:getInstance():getWinSize()
-            if (location.x < winSize.width/2) then
-                self._joystickMove:showJoystick(location.x,location.y)
-            else
-                self._joystickShoot:showJoystick(location.x,location.y)
-            end
         end
         -- CCTOUCHBEGAN event must return true
         return true
@@ -66,11 +62,11 @@ function OperateLayer:ctor()
             local start = touches[i]:getStartLocation()
             local location = touches[i]:getLocation()
             local winSize = cc.Director:getInstance():getWinSize()
-            if (start.x < winSize.width/2 and location.x < winSize.width/2) then
+            if (cc.rectContainsPoint(self._joystickMove._boundingRect, start) and cc.rectContainsPoint(self._joystickMove._boundingRect, location)) then
                 isMoveTouch = true
                 self._joystickMove:updateJoystick(location.x,location.y)
                 self._tank:setMoveDirection(location.x-start.x, location.y-start.y)
-            elseif (start.x > winSize.width/2 and location.x > winSize.width/2) then
+            elseif (cc.rectContainsPoint(self._joystickShoot._boundingRect, start) and cc.rectContainsPoint(self._joystickShoot._boundingRect, location)) then
                 isShootTouch = true
                 self._joystickShoot:updateJoystick(location.x,location.y)
                 self._tank:setShootDirection(location.x-start.x, location.y-start.y)
@@ -78,11 +74,11 @@ function OperateLayer:ctor()
         end
         
         if (isMoveTouch == false) then
-            self._joystickMove:hideJoystick()
             self._tank:setMoveDirection(0, 0)
+            self._joystickMove:reset()
         end
         if (isShootTouch == false) then
-            self._joystickShoot:hideJoystick()
+            self._joystickShoot:reset()
         end
     end
 
@@ -90,12 +86,11 @@ function OperateLayer:ctor()
         for i=1, #touches do
             local start = touches[i]:getStartLocation()
             local location = touches[i]:getLocation()
-            local winSize = cc.Director:getInstance():getWinSize()
-            if (start.x < winSize.width/2 and location.x < winSize.width/2) then
-                self._joystickMove:hideJoystick()
+            if (cc.rectContainsPoint(self._joystickMove._boundingRect, start) and cc.rectContainsPoint(self._joystickMove._boundingRect, location)) then
+                self._joystickMove:reset()
                 self._tank:setMoveDirection(0, 0)
-            elseif (start.x > winSize.width/2 and location.x > winSize.width/2) then
-                self._joystickShoot:hideJoystick()
+            elseif (cc.rectContainsPoint(self._joystickShoot._boundingRect, start) and cc.rectContainsPoint(self._joystickShoot._boundingRect, location)) then
+                self._joystickShoot:reset()
             end
         end
     end

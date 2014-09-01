@@ -15,13 +15,11 @@ function GameLayer.create()
 end
 
 function GameLayer:ctor()
-    self.visibleSize = cc.Director:getInstance():getVisibleSize()
-    self.origin = cc.Director:getInstance():getVisibleOrigin()
     
     local tank = require("BattleScene/Tank")
     self._tank = tank:create()
     self._tank:addToLayer(self)
-    self._tank:setPosition(100, 100)
+    self._tank:setPosition(visibleRect.xMid, visibleRect.yMid)
     local dt = 1
     local function update()
         dt = dt + 1 
