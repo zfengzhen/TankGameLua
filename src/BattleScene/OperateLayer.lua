@@ -62,20 +62,23 @@ function OperateLayer:ctor()
             local start = touches[i]:getStartLocation()
             local location = touches[i]:getLocation()
             local winSize = cc.Director:getInstance():getWinSize()
-            if (cc.rectContainsPoint(self._joystickMove._boundingRect, start) and cc.rectContainsPoint(self._joystickMove._boundingRect, location)) then
+            if (start.x < visibleRect.xMid and location.x < visibleRect.xMid) then
+            -- if (cc.rectContainsPoint(self._joystickMove._boundingRect, start) and cc.rectContainsPoint(self._joystickMove._boundingRect, location)) then
                 isMoveTouch = true
                 self._joystickMove:updateJoystick(location.x,location.y)
-                self._tank:setMoveDirection(location.x-start.x, location.y-start.y)
-            elseif (cc.rectContainsPoint(self._joystickShoot._boundingRect, start) and cc.rectContainsPoint(self._joystickShoot._boundingRect, location)) then
+                self._tank:setMoveDeg(self._joystickMove:getDeg())
+                self._tank:move()
+            else
+            -- elseif (cc.rectContainsPoint(self._joystickShoot._boundingRect, start) and cc.rectContainsPoint(self._joystickShoot._boundingRect, location)) then
                 isShootTouch = true
                 self._joystickShoot:updateJoystick(location.x,location.y)
-                self._tank:setShootDirection(location.x-start.x, location.y-start.y)
+                self._tank:setShootDeg(self._joystickShoot:getDeg())
             end
         end
         
         if (isMoveTouch == false) then
-            self._tank:setMoveDirection(0, 0)
             self._joystickMove:reset()
+            self._tank:stop()
         end
         if (isShootTouch == false) then
             self._joystickShoot:reset()
@@ -86,10 +89,12 @@ function OperateLayer:ctor()
         for i=1, #touches do
             local start = touches[i]:getStartLocation()
             local location = touches[i]:getLocation()
-            if (cc.rectContainsPoint(self._joystickMove._boundingRect, start) and cc.rectContainsPoint(self._joystickMove._boundingRect, location)) then
+            if (start.x < visibleRect.xMid and location.x < visibleRect.xMid) then
+            -- if (cc.rectContainsPoint(self._joystickMove._boundingRect, start) and cc.rectContainsPoint(self._joystickMove._boundingRect, location)) then
                 self._joystickMove:reset()
-                self._tank:setMoveDirection(0, 0)
-            elseif (cc.rectContainsPoint(self._joystickShoot._boundingRect, start) and cc.rectContainsPoint(self._joystickShoot._boundingRect, location)) then
+                self._tank:stop()
+            else
+            -- elseif (cc.rectContainsPoint(self._joystickShoot._boundingRect, start) and cc.rectContainsPoint(self._joystickShoot._boundingRect, location)) then
                 self._joystickShoot:reset()
             end
         end

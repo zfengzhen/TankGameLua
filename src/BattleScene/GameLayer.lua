@@ -23,10 +23,10 @@ function GameLayer:ctor()
     local dt = 1
     local function update()
         dt = dt + 1 
-        self._tank:move()
-        self._tank:shoot()
+        self._tank:moveUpdate()
+        self._tank:shootUpdate()
         if (dt % 60 == 0) then
-            self._bulletLayer:addNewBullet(self._tank._tankHead:getPositionX(), self._tank._tankHead:getPositionY(), {x=self._tank._shootDirectionX, y =self._tank._shootDirectionY})
+            self._bulletLayer:addNewBullet(self._tank._tankHead:getPositionX(), self._tank._tankHead:getPositionY(), self._tank._shootDeg)
         end
     end
     

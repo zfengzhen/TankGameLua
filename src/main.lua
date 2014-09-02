@@ -1,4 +1,3 @@
-
 require "Cocos2d"
 
 -- cclog
@@ -26,6 +25,7 @@ local function main()
     cc.Director:getInstance():getOpenGLView():setDesignResolutionSize(480, 320, 0)
 
     dump = require("inspect")
+    require "utils"
         
     local size = cc.Director:getInstance():getVisibleSize()
     local origin = cc.Director:getInstance():getVisibleOrigin()

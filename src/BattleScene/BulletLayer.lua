@@ -5,6 +5,7 @@ local cclog = function(...)
     print(string.format(...))
 end
 
+-- 创建子弹层
 local BulletLayer = class("BulletLayer",function()
     return cc.Layer:create()
 end)
@@ -15,9 +16,6 @@ function BulletLayer.create()
 end
 
 function BulletLayer:ctor()
-    self._visibleSize = cc.Director:getInstance():getVisibleSize()
-    self._origin = cc.Director:getInstance():getVisibleOrigin()
-
     self._bulletArray = {}
     setmetatable(self._bulletArray, {__mode = "v"})
     self._bulletBatchNode = cc.SpriteBatchNode:create("bullet.png")
@@ -26,51 +24,21 @@ function BulletLayer:ctor()
     self:addChild(self._bulletBatchNode)
 end
 
-function BulletLayer:addNewBullet(x, y, direction)
+-- 添加新的子弹
+function BulletLayer:addNewBullet(x, y, deg)
     local newBullet = cc.Sprite:createWithTexture(self._bulletBatchNode:getTexture())
     newBullet:setPosition(x, y)
     self._bulletBatchNode:addChild(newBullet)
     
-    local length = 2*self._visibleSize.width
+    local length = 2*visibleRect.width
     local velocity = 500 --飞行速度
     local moveTime = length/velocity
-    local actionMove = nil
-    
-    if (direction.x == 0 and direction.y == 0) then
-        actionMove = cc.MoveTo:create(moveTime, cc.p(x, 2*self._visibleSize.width))
-        newBullet:setRotation(0)
-    elseif (direction.y > 0 and direction.x == 0) then
-        actionMove = cc.MoveTo:create(moveTime, cc.p(x, 2*self._visibleSize.width))
-        newBullet:setRotation(0)
-    elseif (direction.y < 0 and direction.x == 0) then
-        actionMove = cc.MoveTo:create(moveTime, cc.p(x, 0))
-        newBullet:setRotation(180)
-    else
-        local deg = math.deg(math.atan(direction.x/direction.y))       
-        local slope = (direction.y) / (direction.x) 
-        local curX = 0
-        local curY = 0
-        local radius = self._visibleSize.width
-        if (direction.x > 0) then
-            curX = radius/(math.sqrt(slope*slope +1)) + x
-        else
-            curX = -radius/(math.sqrt(slope*slope +1)) + x
-        end
-    
-        if (direction.y > 0) then
-            curY = radius*math.abs(slope)/(math.sqrt(slope*slope +1)) + y
-            newBullet:setRotation(deg)
-        else
-            curY = -radius*math.abs(slope)/(math.sqrt(slope*slope +1)) + y
-            newBullet:setRotation(180+deg)
-        end
-        cclog("direction.x[%f] y[%f]", direction.x, direction.y)
-        cclog("curX[%f] curY[%f]", curX, curY)
-        actionMove = cc.MoveTo:create(moveTime, cc.p(curX, curY))
-    end
+
+    local curX, curY = moveByDeg(x, y, length, deg)
+    newBullet:setRotation(deg) 
+    local actionMove = cc.MoveTo:create(moveTime, cc.p(curX, curY))
     
     local function removeBullet()
-        cclog("removeBullet")
         self._bulletBatchNode:removeChild(newBullet, true)
     end
     
