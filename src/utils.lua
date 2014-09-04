@@ -30,3 +30,12 @@ function moveByDeg(x, y, length, deg)
     
     return curX, curY
 end
+
+function initWithLayer(layer, callback)
+    local function onNodeEvent(event)
+        if "enter" == event then
+            callback()
+        end
+    end
+    layer:registerScriptHandler(onNodeEvent)
+end

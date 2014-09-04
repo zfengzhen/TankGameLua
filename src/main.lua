@@ -20,6 +20,8 @@ local function main()
     collectgarbage("setpause", 100)
     collectgarbage("setstepmul", 5000)
     
+    math.randomseed(os.time())
+    
     cc.FileUtils:getInstance():addSearchPath("src")
     cc.FileUtils:getInstance():addSearchPath("res")
     cc.Director:getInstance():getOpenGLView():setDesignResolutionSize(480, 320, 0)
@@ -29,6 +31,7 @@ local function main()
         
     local size = cc.Director:getInstance():getVisibleSize()
     local origin = cc.Director:getInstance():getVisibleOrigin()
+    
     visibleRect = cc.rect(origin.x, origin.y, size.width, size.height)
     visibleRect.xMid = cc.rectGetMidX(visibleRect)
     visibleRect.yMid = cc.rectGetMidY(visibleRect)
@@ -36,13 +39,15 @@ local function main()
     visibleRect.yMax = cc.rectGetMaxY(visibleRect)
     
     --create scene 
-    local scene = require("BattleScene/BattleScene")
-    local battleScene = scene.create()
+--    local scene = require("BattleScene/BattleScene")
+--    local battleScene = scene.create()
+    local scene = require("MainScene/MainScene")
+    local mainScene = scene.create()
     
     if cc.Director:getInstance():getRunningScene() then
-        cc.Director:getInstance():replaceScene(battleScene)
+        cc.Director:getInstance():replaceScene(mainScene)
     else
-        cc.Director:getInstance():runWithScene(battleScene)
+        cc.Director:getInstance():runWithScene(mainScene)
     end
 
 end

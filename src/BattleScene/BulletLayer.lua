@@ -28,6 +28,13 @@ end
 function BulletLayer:addNewBullet(x, y, deg)
     local newBullet = cc.Sprite:createWithTexture(self._bulletBatchNode:getTexture())
     newBullet:setPosition(x, y)
+    local body = cc.PhysicsBody:createBox(
+        cc.size(newBullet:getContentSize().width*newBullet:getScale(), 
+            newBullet:getContentSize().height*newBullet:getScale()))
+    body:setCategoryBitmask(0x01)
+    body:setContactTestBitmask(0x02)
+    body:setCollisionBitmask(0)   
+    newBullet:setPhysicsBody(body)
     self._bulletBatchNode:addChild(newBullet)
     
     local length = 2*visibleRect.width

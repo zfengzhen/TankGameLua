@@ -17,7 +17,6 @@ end
 function Joystick:ctor(joystickPic, joystickBgPic)
     self._joystick = cc.Sprite:create(joystickPic)
     self._joystickBg = cc.Sprite:create(joystickBgPic)
-    self._joystick:setScale(0.5)
     self._boundingRect = getBoundingRect(self._joystickBg)
     self._isMoved = false
     self._moveDeg = 0
@@ -45,8 +44,14 @@ function Joystick:setRightBottom()
     self._boundingRect = getBoundingRect(self._joystickBg)
 end
 
+function Joystick:enlarge()
+    self._joystickBg:setScale(1.5)
+end
+
 -- 重置摇杆位置
 function Joystick:reset()
+    self._joystick:setScale(1)
+    self._joystickBg:setScale(1)
     self._joystick:setPosition(self._boundingRect.xMid, self._boundingRect.yMid)
     self._joystickBg:setPosition(self._boundingRect.xMid, self._boundingRect.yMid)
     self._isMoved = false

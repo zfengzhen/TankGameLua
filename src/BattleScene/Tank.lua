@@ -5,7 +5,10 @@ local cclog = function(...)
     print(string.format(...))
 end
 
-local Tank = class("Tank")
+local Tank = class("Tank",function()
+    return cc.Sprite:create()
+end)
+
 -- 坦克状态
 local TankState = {RUN = 1, STOP =2, DEATH =3}
 
@@ -16,31 +19,27 @@ function Tank.create()
 end
 
 function Tank:ctor()
-    self._tankHead = cc.Sprite:create("tankHead.png")
-    self._tankBody = cc.Sprite:create("tankBody.png")
-    self._tankHead:setScale(0.3)
-    self._tankBody:setScale(0.3)
-    self._tankHead:setAnchorPoint(cc.p(0.5, 0.35))
-    self._moveDeg = 0
-    self._shootDeg = 0
+    -- 初始化图片
+    self:setTexture("tank.png")
+    -- 设置旋转角度
+    self._rotateDeg = 0
+    self:setRotation(self._rotateDeg)
+    -- 设置坦克状态
     self._state = TankState.STOP
-    self._tankHead:setRotation(self._shootDeg)
-    self._tankBody:setRotation(self._moveDeg)
+    -- 设置坦克速度
     self:setSpeed(0.7)
-    self._boundingRect = getBoundingRect(self._tankBody)
-end
-
--- 设置坦克位置
-function Tank:setPosition(x, y)
-    self._tankHead:setPosition(x, y)
-    self._tankBody:setPosition(x, y)
-    self._boundingRect = getBoundingRect(self._tankBody)
-end
-
--- 添加到Layer
-function Tank:addToLayer(layer)
-    layer:addChild(self._tankHead, 1)
-    layer:addChild(self._tankBody, 0)
+    -- 创建物理body   
+    self._body = cc.PhysicsBody:createBox(
+        cc.size(self:getContentSize().width*self:getScale(), 
+        self:getContentSize().height*self:getScale()))
+    -- 设置物理类别
+    self._body:setCategoryBitmask(0x02)
+    -- 设置碰撞触发回调bitmask
+    self._body:setContactTestBitmask(0x01) 
+    -- 设置碰撞bitmask
+    self._body:setCollisionBitmask(0x02)  
+    self._body:setDynamic(true)    
+    self:setPhysicsBody(self._body)
 end
 
 -- 设置坦克移动速度
@@ -48,14 +47,9 @@ function Tank:setSpeed(speed)
     self._speed = speed
 end
 
--- 设置移动角度
-function Tank:setMoveDeg(deg)
-    self._moveDeg = deg
-end
-
--- 设置射击角度
-function Tank:setShootDeg(deg)
-    self._shootDeg = deg
+-- 设置旋转角度
+function Tank:setRotateDeg(deg)
+    self._rotateDeg = deg
 end
 
 -- 坦克停止移动
@@ -89,18 +83,14 @@ function Tank:moveUpdate()
         return
     end
     
-    local startX = self._tankBody:getPositionX()
-    local startY = self._tankBody:getPositionY()
-    local deg = self._moveDeg % 360
+    local startX = self:getPositionX()
+    local startY = self:getPositionY()
+    local deg = self._rotateDeg % 360
     local curX, curY = moveByDeg(startX, startY, self._speed, deg)
 
-    self._tankBody:setRotation(deg)   
+    self:setRotation(deg)   
     self:setPosition(curX, curY)
 end
 
--- 射击更新(暂时是射击方向)
-function Tank:shootUpdate()
-    self._tankHead:setRotation(self._shootDeg)   
-end
 
 return Tank
