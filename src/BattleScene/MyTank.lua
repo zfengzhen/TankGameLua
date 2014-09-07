@@ -37,6 +37,10 @@ end
 
 function MyTank:tankUpdate(gameLayer)
     self:baseTankUpdate()
+    if (self._state == MyTank.TankState.DEATH) then
+        gameLayer._gameEndLayer:showDistroyNum(gameLayer._tankDistory)
+    end
+    
     if (self._isReadyForShoot == true) then
         local x = self:getPositionX()
         local y = self:getPositionY()

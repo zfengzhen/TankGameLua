@@ -28,11 +28,16 @@ function BattleScene:ctor()
     
     local layer = require("BattleScene/BulletLayer")
     local bulletLayer = layer.create()
-    self:addChild(bulletLayer)
+    self:addChild(bulletLayer, 1)
+    
+    local layer = require("BattleScene/GameEndLayer")
+    local gameEndLayer = layer.create()
+    self:addChild(gameEndLayer, 4)
 
     local layer = require("BattleScene/GameLayer")
     local gameLayer = layer.create()
     gameLayer._bulletLayer = bulletLayer
+    gameLayer._gameEndLayer = gameEndLayer
     self:addChild(gameLayer)
 
     local layer = require("BattleScene/OperateLayer")

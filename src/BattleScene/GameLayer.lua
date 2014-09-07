@@ -15,10 +15,15 @@ function GameLayer.create()
 end
 
 function GameLayer:ctor()
+    -- 初始化背景
+    local sprite = cc.Sprite:create("battleBg.png")
+    sprite:setAnchorPoint(0, 0)
+    self:addChild(sprite, 0)
+    
     local MyTankClass = require("BattleScene/MyTank")
     -- 我方坦克初始化
     MyTankClass._pic = "tank.png"
-    MyTankClass._hp = 100 -- 血量
+    MyTankClass._hp = 1 -- 血量
     MyTankClass._speed = 1 -- 移动速度
     MyTankClass._shootLength = 100 -- 炮弹射程
     MyTankClass._physicsType = 1 -- 物理类别
@@ -31,11 +36,11 @@ function GameLayer:ctor()
     -- 敌方坦克初始化
     EnemyTankClass._pic = "tankEnemy.png"
     EnemyTankClass._hp = 1 -- 血量
-    EnemyTankClass._speed = 0.5 -- 移动速度
+    EnemyTankClass._speed = 0.4 -- 移动速度
     EnemyTankClass._shootLength = 50 -- 炮弹射程
     EnemyTankClass._physicsType = 2 -- 物理类别
     EnemyTankClass._physicsContact = {3,} -- 接收物理类别回调
-    EnemyTankClass._physicsCollision = {1,} -- 接收物理类别碰撞
+    EnemyTankClass._physicsCollision = {1,2,} -- 接收物理类别碰撞
     -- #############################################  
 
     self._explodeBatchNode = cc.SpriteBatchNode:create("explode.png")
@@ -52,8 +57,8 @@ function GameLayer:ctor()
     self._enemyTanksNum = 0
     setmetatable(self._enemyTanks, {__mode = "v"})  
     
-    self._label = cc.LabelTTF:create("", "Arial", 30)
-    self._label:setPosition(visibleRect.xMid, visibleRect.yMax - 50)
+    self._label = cc.LabelTTF:create("", "Arial", 15)
+    self._label:setPosition(visibleRect.xMid, visibleRect.yMax - 20)
     self:addChild(self._label, 3)
       
 
@@ -64,7 +69,7 @@ function GameLayer:ctor()
         local str = "hp[" .. self._tank._hp .. "] distory[" .. self._tankDistory .. "]"
         self._label:setString(str)
 
-        if (time > 3 and self._enemyTanksNum < 5) then
+        if (time > 3 and self._enemyTanksNum < 20) then
             time = 0
             local function enemyRandomPos()
                 if (math.random(1,4) == 1) then
