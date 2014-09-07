@@ -16,44 +16,82 @@ function BulletLayer.create()
 end
 
 function BulletLayer:ctor()
-    self._bulletArray = {}
-    setmetatable(self._bulletArray, {__mode = "v"})
+    self._myBulletArray = {}
+    setmetatable(self._myBulletArray, {__mode = "v"})
+    self._enemyBulletArray = {}
+    setmetatable(self._enemyBulletArray, {__mode = "v"})
     self._bulletBatchNode = cc.SpriteBatchNode:create("bullet.png")
     self._bulletBatchNode:setPosition(0,0)
     self._bulletBatchNode:setScale(1) 
     self:addChild(self._bulletBatchNode)
 end
 
--- 添加新的子弹
-function BulletLayer:addNewBullet(x, y, deg)
-    local newBullet = cc.Sprite:createWithTexture(self._bulletBatchNode:getTexture())
-    newBullet:setPosition(x, y)
+-- 添加我方子弹
+function BulletLayer:addMyBullet(x, y, direction, length)
+    local myBullet = cc.Sprite:createWithTexture(self._bulletBatchNode:getTexture())
+    myBullet:setPosition(x, y)
+    myBullet:setScale(0.5)
     local body = cc.PhysicsBody:createBox(
-        cc.size(newBullet:getContentSize().width*newBullet:getScale(), 
-            newBullet:getContentSize().height*newBullet:getScale()))
-    body:setCategoryBitmask(0x01)
+        cc.size(myBullet:getContentSize().width*myBullet:getScale(), 
+            myBullet:getContentSize().height*myBullet:getScale()))
+    body:setCategoryBitmask(0x04)
     body:setContactTestBitmask(0x02)
     body:setCollisionBitmask(0)   
-    newBullet:setPhysicsBody(body)
-    self._bulletBatchNode:addChild(newBullet)
+    myBullet:setPhysicsBody(body)
+    self._bulletBatchNode:addChild(myBullet)
     
-    local length = 2*visibleRect.width
-    local velocity = 500 --飞行速度
-    local moveTime = length/velocity
-
-    local curX, curY = moveByDeg(x, y, length, deg)
-    newBullet:setRotation(deg) 
-    local actionMove = cc.MoveTo:create(moveTime, cc.p(curX, curY))
+    -- local length = 2*visibleRect.width
+    local speed = 200 --飞行速度
+    local moveTime = length/speed
+    
+    local velocity = cc.pMul(cc.pNormalize(direction), length)
+    local curPos = cc.pAdd(velocity, {x=x, y=y})
+    myBullet:setRotation(90 - math.deg(cc.pToAngleSelf(direction)))
+    local actionMove = cc.MoveTo:create(moveTime, cc.p(curPos.x, curPos.y))
     
     local function removeBullet()
-        self._bulletBatchNode:removeChild(newBullet, true)
+        self._bulletBatchNode:removeChild(myBullet, true)
     end
     
     local actionDone = cc.CallFunc:create(removeBullet)
     local sequence = cc.Sequence:create(actionMove, actionDone)
-    newBullet:runAction(sequence)
+    myBullet:runAction(sequence)
     
-    table.insert(self._bulletArray, newBullet)
+    table.insert(self._myBulletArray, myBullet)
+end
+
+-- 添加敌方子弹
+function BulletLayer:addEnemyBullet(x, y, direction, length)
+    local enemyBullet = cc.Sprite:createWithTexture(self._bulletBatchNode:getTexture())
+    enemyBullet:setScale(0.5)
+    enemyBullet:setPosition(x, y)
+    local body = cc.PhysicsBody:createBox(
+        cc.size(enemyBullet:getContentSize().width*enemyBullet:getScale(), 
+            enemyBullet:getContentSize().height*enemyBullet:getScale()))
+    body:setCategoryBitmask(0x08)
+    body:setContactTestBitmask(0x01)
+    body:setCollisionBitmask(0)   
+    enemyBullet:setPhysicsBody(body)
+    self._bulletBatchNode:addChild(enemyBullet)
+
+    -- local length = 2*visibleRect.width
+    local speed = 50 --飞行速度
+    local moveTime = length/speed
+
+    local velocity = cc.pMul(cc.pNormalize(direction), length)
+    local curPos = cc.pAdd(velocity, {x=x, y=y})
+    enemyBullet:setRotation(90 - math.deg(cc.pToAngleSelf(direction))) 
+    local actionMove = cc.MoveTo:create(moveTime, cc.p(curPos.x, curPos.y))
+
+    local function removeBullet()
+        self._bulletBatchNode:removeChild(enemyBullet, true)
+    end
+
+    local actionDone = cc.CallFunc:create(removeBullet)
+    local sequence = cc.Sequence:create(actionMove, actionDone)
+    enemyBullet:runAction(sequence)
+
+    table.insert(self._enemyBulletArray, enemyBullet)
 end
 
 return BulletLayer

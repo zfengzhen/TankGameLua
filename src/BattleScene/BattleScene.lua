@@ -19,6 +19,13 @@ function BattleScene:ctor()
     self.schedulerID = nil
     self:getPhysicsWorld():setGravity(cc.p(0, 0))
     
+    local body = cc.PhysicsBody:createEdgeBox(cc.size(visibleRect.width, visibleRect.height))
+    local edgeNode = cc.Node:create()
+    edgeNode:setPosition(visibleRect.xMid, visibleRect.yMid)
+    edgeNode:setPhysicsBody(body)
+    self:addChild(edgeNode)
+        
+    
     local layer = require("BattleScene/BulletLayer")
     local bulletLayer = layer.create()
     self:addChild(bulletLayer)

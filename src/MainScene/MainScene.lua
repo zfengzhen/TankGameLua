@@ -15,6 +15,11 @@ function MainScene.create()
 end
 
 function MainScene:ctor()
+    -- 添加背景图片
+    local mainSceneBg = cc.Sprite:create("mainSceneBg.png")
+    mainSceneBg:setPosition(visibleRect.xMid, visibleRect.yMid)
+    self:addChild(mainSceneBg)
+    
     -- 开始游戏按钮回调
     local function menuStartGameCallback(sender)
         local scene = require("BattleScene/BattleScene")
@@ -26,7 +31,7 @@ function MainScene:ctor()
     local startGameItem = cc.MenuItemImage:create("startGameMenu.png", "startGameMenu.png")
     startGameItem:registerScriptTapHandler(menuStartGameCallback)
     startGameItem:setPosition(visibleRect.xMid,
-        visibleRect.yMid + startGameItem:getContentSize().height/2 + 5)
+        visibleRect.yMid - startGameItem:getContentSize().height + 5)
  
     -- 关闭游戏按钮回调
     local function menuEndGameCallback(sender)
@@ -37,7 +42,7 @@ function MainScene:ctor()
     local endGameItem = cc.MenuItemImage:create("endGameMenu.png", "endGameMenu.png")
     endGameItem:registerScriptTapHandler(menuEndGameCallback)
     endGameItem:setPosition(visibleRect.xMid,
-        visibleRect.yMid - endGameItem:getContentSize().height/2 - 5)
+        visibleRect.yMid - 2 * endGameItem:getContentSize().height - 5)
                
     -- 菜单   
     local  menu = cc.Menu:create()
@@ -45,6 +50,11 @@ function MainScene:ctor()
     menu:addChild(endGameItem)
     menu:setPosition(cc.p(0,0))
     self:addChild(menu)
+    
+    -- 标题
+    local label = cc.LabelTTF:create("坦克大战", "Arial", 30)
+    label:setPosition(visibleRect.xMid, visibleRect.yMax - 50)
+    self:addChild(label, 3) 
 
 end
 

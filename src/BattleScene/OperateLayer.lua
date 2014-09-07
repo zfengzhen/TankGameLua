@@ -16,9 +16,9 @@ end
 
 function OperateLayer:ctor()   
     local joystick = require("BattleScene/Joystick")
-    self._joystickMove = joystick.create("joystick.png", "joystickBg.png")
-    self._joystickMove:setLeftBottom()
-    self._joystickMove:addToLayer(self)
+    self._joystick = joystick.create("joystick.png", "joystickBg.png")
+    self._joystick:setLeftBottom()
+    self._joystick:addToLayer(self)
     
     -- 关闭按钮回调
     local function menuCloseCallback(sender)
@@ -33,37 +33,33 @@ function OperateLayer:ctor()
     closeItem:setPosition(visibleRect.x + visibleRect.width - closeItem:getContentSize().width/2,
         visibleRect.y + visibleRect.height - closeItem:getContentSize().height/2)
  
-    -- 炮弹按钮回调
-    local function menuBulletCallback(sender)
-        self._bulletLayer:addNewBullet(self._tank:getPositionX(),
-            self._tank:getPositionY(), self._tank._rotateDeg)
-    end
-            
-    -- 炮弹按钮
-    local bulletItem = cc.MenuItemImage:create("bulletNormal.png", "bulletSelected.png")
-    bulletItem:registerScriptTapHandler(menuBulletCallback)
-    bulletItem:setPosition(visibleRect.x + visibleRect.width - bulletItem:getContentSize().width,
-        visibleRect.y + bulletItem:getContentSize().height)
-    
     -- 菜单   
     local  menu = cc.Menu:create()
     menu:addChild(closeItem)
-    menu:addChild(bulletItem)
     menu:setPosition(cc.p(0,0))
     self:addChild(menu)
-
+               
+    -- 炮弹按钮
+    self._bulletButton = cc.Sprite:create("bulletNormal.png")
+    self._bulletButton:setPosition(visibleRect.x + visibleRect.width - self._bulletButton:getContentSize().width,
+        visibleRect.y + self._bulletButton:getContentSize().height)
+    self:addChild(self._bulletButton)
+    
     -- 触摸事件
+    local isBulletButtonPressed = false
     local function onTouchesBegan(touches, event)
         for i=1, #touches do
             local start = touches[i]:getLocation()
-            if (cc.rectContainsPoint(self._joystickMove._boundingRect, start)
-                and cc.rectContainsPoint(self._joystickMove._boundingRect, start)) then
-                -- CCTOUCHBEGAN event must return true
-                self._joystickMove:enlarge()
+            if (cc.rectContainsPoint(self._joystick:getBoundingBox(), start)) then
+                self._joystick:enlarge()
                 return true
+            elseif (cc.rectContainsPoint(self._bulletButton:getBoundingBox(), start)) then
+                self._bulletButton:setScale(2)
+                isBulletButtonPressed = true
+                self._tank._isReadyForShoot = true
             end
         end
-        return false
+        return true
     end
 
     local function onTouchesMoved(touches, event)
@@ -74,17 +70,20 @@ function OperateLayer:ctor()
             local location = touches[i]:getLocation()
             local winSize = cc.Director:getInstance():getWinSize()
             -- if (start.x < visibleRect.xMid and location.x < visibleRect.xMid) then
-            if (cc.rectContainsPoint(self._joystickMove._boundingRect, start)
-                and cc.rectContainsPoint(self._joystickMove._boundingRect, start)) then
+            if (cc.rectContainsPoint(self._joystick:getBoundingBox(), start)) then
                 isMoveTouch = true
-                self._joystickMove:updateJoystick(location.x,location.y)
-                self._tank:setRotateDeg(self._joystickMove:getDeg())
+                self._joystick:updateJoystick(location.x,location.y)
+                self._tank._direction = self._joystick:getDirection()                
                 self._tank:move()
+            elseif (cc.rectContainsPoint(self._bulletButton:getBoundingBox(), start) and
+                cc.rectContainsPoint(self._bulletButton:getBoundingBox(), location) == false
+                and isBulletButtonPressed == true) then
+                --
             end
         end
         
         if (isMoveTouch == false) then
-            self._joystickMove:reset()
+            self._joystick:reset()
             self._tank:stop()
         end
     end
@@ -94,8 +93,17 @@ function OperateLayer:ctor()
             local start = touches[i]:getStartLocation()
             local location = touches[i]:getLocation()
             if (start.x < visibleRect.xMid and location.x < visibleRect.xMid) then
-                self._joystickMove:reset()
+                self._joystick:reset()
                 self._tank:stop()
+            elseif (cc.rectContainsPoint(self._bulletButton:getBoundingBox(), start)) then
+                local x = self._tank:getPositionX()
+                local y = self._tank:getPositionY()
+                local length = self._tank:getContentSize().height * self._tank:getScale() / 2
+                local curPos = cc.pAdd({x=x,y=y}, cc.pMul(self._tank:getDirection(), length))
+                self._bulletLayer:addMyBullet(curPos.x, curPos.y, self._tank:getDirection(), self._tank._shootLength)
+                self._bulletButton:setScale(1)
+                isBulletButtonPressed = false
+                self._tank._isReadyForShoot = false
             end
         end
     end
